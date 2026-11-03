@@ -1,0 +1,33 @@
+# OSCtoDiscord configuration. Copy to config.yaml and edit.
+
+# The numeric id of the Discord channel messages are posted to.
+# (Discord: User Settings > Advanced > Developer Mode, then right-click the
+# channel > Copy Channel ID.)
+channel_id: "123456789012345678"
+
+# Named OSC addresses -> predefined messages. Each entry may have:
+#   content: text to send. Positional OSC arguments are substituted for {0}, {1}, ...
+#   image:   a URL or local file path, shown as an embedded picture
+#   video:   a URL or local file path, shown as an inline video player
+# At least one of content / image / video is required.
+messages:
+  # Plain text only
+  /discord/starting:
+    content: "Stream is starting, hang tight!"
+
+  # Text with an embedded picture (URL)
+  /discord/live:
+    content: "We're live!"
+    image: https://example.com/live-banner.png
+
+  # Text with a video (URL or local file)
+  /discord/highlight:
+    content: "Highlight of the night"
+    video: https://example.com/highlight.mp4
+
+  # Template using an OSC argument, e.g. `oscsend ... /discord/scene s "Main"`
+  /discord/scene:
+    content: "Now showing: {0}"
+
+  # Shorthand: a bare string is plain text
+  /discord/brb: "BRB - back soon"
