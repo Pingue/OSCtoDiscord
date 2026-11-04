@@ -58,7 +58,20 @@ messages:
   /discord/brb: "BRB"                         # bare string = plain text
 ```
 
-`content`, `image` and `video` are each optional, but at least one is required.
+### Ad-hoc message: `/discord/say`
+
+`/discord/say <message> [image-or-video]` posts whatever you send, no config
+entry needed. The second argument is optional and can be a URL or a local file
+path; it's treated as an image if it ends in `.png`, `.jpg`, `.jpeg`, `.gif` or
+`.webp`, and as a video otherwise (including links like YouTube).
+
+```bash
+oscsend 127.0.0.1 1339 /discord/say s "Hello everyone"
+oscsend 127.0.0.1 1339 /discord/say ss "Look at this" "https://example.com/pic.png"
+oscsend 127.0.0.1 1339 /discord/say ss "Replay" "https://example.com/clip.mp4"
+```
+
+For the config-defined messages above, `content`, `image` and `video` are each optional, but at least one is required.
 `image` and `video` can be a URL or a path to a local file (local files are
 uploaded; max 10MB).
 

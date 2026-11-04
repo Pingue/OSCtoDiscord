@@ -83,3 +83,22 @@ def test_rate_limit_retries_once(monkeypatch):
     s = MagicMock(); s.request.side_effect = [resp(429, {"retry_after": 0.1}), resp(200)]
     DiscordChannel("tok", session=s).send_message("9", "x")
     assert s.request.call_count == 2
+
+
+def test_say_address():
+    dc = MagicMock()
+    m = Mapper(dc, 1)
+    m.handle_osc_message("/discord/say", "hello")
+    dc.send_message.assert_called_with("1", content="hello")
+    m.handle_osc_message("/discord/say", "pic", "https://x/a.PNG?v=1")
+    dc.send_message.assert_called_with("1", content="pic", image="https://x/a.PNG?v=1")
+    m.handle_osc_message("/discord/say", "clip", "/tmp/c.mp4")
+    dc.send_message.assert_called_with("1", content="clip", video="/tmp/c.mp4")
+    m.handle_osc_message("/discord/say", "yt", "https://youtu.be/abc")
+    dc.send_message.assert_called_with("1", content="yt", video="https://youtu.be/abc")
+    m.handle_osc_message("/discord/say", "", "b.jpg")
+    dc.send_message.assert_called_with("1", image="b.jpg")
+    dc.reset_mock()
+    m.handle_osc_message("/discord/say")
+    m.handle_osc_message("/discord/say", "")
+    dc.send_message.assert_not_called()

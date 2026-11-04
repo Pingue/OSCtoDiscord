@@ -1,9 +1,20 @@
+import os
 from typing import Any, Dict, List, Optional, Union
+from urllib.parse import urlparse
 import structlog
 
 from discord_client import DiscordChannel
 
 MessageSpec = Union[str, Dict[str, str]]
+
+SAY_ADDRESS = "/discord/say"
+IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
+
+
+def media_kind(media: str) -> str:
+    """'image' for known picture extensions; anything else (mp4, YouTube links...) is 'video'."""
+    path = urlparse(media).path if media.startswith(("http://", "https://")) else media
+    return "image" if os.path.splitext(path)[1].lower() in IMAGE_EXTENSIONS else "video"
 
 
 class Mapper:
@@ -24,6 +35,8 @@ class Mapper:
 
     def build_message(self, address: str, args: List[Any]) -> Optional[Dict[str, str]]:
         """Return {content, image, video} for an OSC address, or None if unknown/unusable."""
+        if address == SAY_ADDRESS:
+            return self._build_say(args)
         spec = self.messages.get(address)
         if spec is None:
             return None
@@ -39,6 +52,20 @@ class Mapper:
                                   address=address, template=spec["content"], args=args)
                 return None
         return result
+
+    def _build_say(self, args: List[Any]) -> Optional[Dict[str, str]]:
+        """/discord/say <message> [image-or-video]"""
+        if not args:
+            self.logger.error("/discord/say needs a message argument")
+            return None
+        result = {}
+        content = str(args[0]).strip()
+        if content:
+            result["content"] = content
+        if len(args) > 1 and str(args[1]).strip():
+            media = str(args[1]).strip()
+            result[media_kind(media)] = media
+        return result or None
 
     def handle_osc_message(self, address: str, *args: Any) -> None:
         self.logger.info("OSC message received", address=address, args=args)
