@@ -3,7 +3,8 @@ import json
 import mimetypes
 import os
 import time
-from typing import Optional
+from typing import List, Optional
+from urllib.parse import quote
 
 import requests
 import structlog
@@ -63,8 +64,9 @@ class DiscordChannel:
                          channel=ch.json().get("name"))
 
     def send_message(self, channel_id: str, content: str = "",
-                     image: Optional[str] = None, video: Optional[str] = None) -> None:
-        """Post a message with optional text, picture and video.
+                     image: Optional[str] = None, video: Optional[str] = None,
+                     reactions: Optional[List[str]] = None) -> None:
+        """Post a message with optional text, picture, video and reactions.
 
         ``image`` / ``video`` may each be a URL or a path to a local file.
 
@@ -110,6 +112,22 @@ class DiscordChannel:
             raise DiscordError(f"Send failed ({resp.status_code}): {resp.text}")
         self.logger.info("Discord message sent", channel_id=channel_id, content=content,
                          image=image, video=video)
+        if reactions:
+            message_id = resp.json()["id"]
+            self.add_reactions(channel_id, message_id, reactions)
+
+    def add_reactions(self, channel_id: str, message_id: str, emojis: List[str]) -> None:
+        """Add one or more reactions to a message, in order.
+
+        Each emoji is either a unicode character (e.g. "🔥") or a custom emoji
+        in ``name:id`` form (e.g. "partyblob:123456789012345678").
+        """
+        for emoji in emojis:
+            path = f"/channels/{channel_id}/messages/{message_id}/reactions/{quote(emoji)}/@me"
+            resp = self._request("PUT", path)
+            if resp.status_code not in (200, 201, 204):
+                self.logger.error("Failed to add reaction", emoji=emoji,
+                                  status=resp.status_code, response=resp.text)
 
     @staticmethod
     def _read_file(path: str):

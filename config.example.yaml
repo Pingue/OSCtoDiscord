@@ -6,9 +6,13 @@
 channel_id: "123456789012345678"
 
 # Named OSC addresses -> predefined messages. Each entry may have:
-#   content: text to send. Positional OSC arguments are substituted for {0}, {1}, ...
-#   image:   a URL or local file path, shown as an embedded picture
-#   video:   a URL or local file path, shown as an inline video player
+#   content:   text to send. Positional OSC arguments are substituted for {0}, {1}, ...
+#   image:     a URL or local file path, shown as an embedded picture
+#   video:     a URL or local file path, shown as an inline video player
+#   reactions: a list of emoji added to the message right after it's sent.
+#              Use the unicode emoji itself (e.g. "🔥") or, for a custom server
+#              emoji, "name:id" (right-click the emoji in Discord and copy its
+#              link to get the id).
 # At least one of content / image / video is required.
 messages:
   # Plain text only
@@ -31,3 +35,8 @@ messages:
 
   # Shorthand: a bare string is plain text
   /discord/brb: "BRB - back soon"
+
+  # Text with instant reactions
+  /discord/gg:
+    content: "GG!"
+    reactions: ["🎉", "🔥"]

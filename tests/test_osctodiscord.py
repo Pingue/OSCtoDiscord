@@ -18,6 +18,7 @@ def test_mapper_templates_and_unknown():
         "/d/plain": "hello",
         "/d/scene": {"content": "Now: {0}"},
         "/d/pic": {"content": "live", "image": "http://x/y.png"},
+        "/d/gg": {"content": "GG!", "reactions": ["🎉", "🔥"]},
         "/d/empty": {},
     })
     m.handle_osc_message("/d/plain")
@@ -26,6 +27,8 @@ def test_mapper_templates_and_unknown():
     dc.send_message.assert_called_with("123", content="Now: Main")
     m.handle_osc_message("/d/pic")
     dc.send_message.assert_called_with("123", content="live", image="http://x/y.png")
+    m.handle_osc_message("/d/gg")
+    dc.send_message.assert_called_with("123", content="GG!", reactions=["🎉", "🔥"])
     dc.reset_mock()
     m.handle_osc_message("/d/scene")     # missing arg
     m.handle_osc_message("/unknown", 1)
@@ -76,6 +79,16 @@ def test_errors(tmp_path):
     s.request.return_value = resp(401)
     with pytest.raises(DiscordError):
         d.validate("9")
+
+
+def test_reactions_are_added_after_send():
+    s = MagicMock(); s.request.return_value = resp(200, {"id": "42"})
+    d = DiscordChannel("tok", session=s)
+    d.send_message("9", "gg", reactions=["🎉", "fire:1"])
+    calls = s.request.call_args_list
+    assert calls[0].args[:2] == ("POST", "https://discord.com/api/v10/channels/9/messages")
+    assert calls[1].args[:2] == ("PUT", "https://discord.com/api/v10/channels/9/messages/42/reactions/%F0%9F%8E%89/@me")
+    assert calls[2].args[:2] == ("PUT", "https://discord.com/api/v10/channels/9/messages/42/reactions/fire%3A1/@me")
 
 
 def test_rate_limit_retries_once(monkeypatch):

@@ -28,10 +28,10 @@ class Mapper:
         self.logger = structlog.get_logger("mapper")
 
     @staticmethod
-    def _normalise(spec: MessageSpec) -> Dict[str, str]:
+    def _normalise(spec: MessageSpec) -> Dict[str, Any]:
         if isinstance(spec, str):
             return {"content": spec}
-        return {k: spec[k] for k in ("content", "image", "video") if spec.get(k)}
+        return {k: spec[k] for k in ("content", "image", "video", "reactions") if spec.get(k)}
 
     def build_message(self, address: str, args: List[Any]) -> Optional[Dict[str, str]]:
         """Return {content, image, video} for an OSC address, or None if unknown/unusable."""

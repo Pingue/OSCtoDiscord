@@ -56,6 +56,9 @@ messages:
   /discord/scene:
     content: "Now showing: {0}"               # {0}, {1}, ... = OSC arguments
   /discord/brb: "BRB"                         # bare string = plain text
+  /discord/gg:
+    content: "GG!"
+    reactions: ["🎉", "🔥"]                    # instant reactions on the message
 ```
 
 ### Ad-hoc message: `/discord/say`
@@ -81,6 +84,10 @@ Notes on how media is shown:
 - **Video**: Discord doesn't let bots create video embeds. A video **URL** is added
   to the message so Discord unfurls it (direct links to `.mp4`/`.webm`, YouTube etc.
   get a player); a **local file** is uploaded and plays inline.
+
+`reactions` is an optional list of emoji the bot adds to the message right after
+sending it, in order. Use the unicode emoji itself, or `name:id` for a custom
+server emoji (not available via `/discord/say`, config-defined messages only).
 
 Content is capped at 2000 characters (Discord's limit).
 
