@@ -107,3 +107,22 @@ the packet.
 ```bash
 pip install pytest && pytest
 ```
+
+## Docker
+
+Images are published to `ghcr.io/pingue/osctodiscord`. Mount your config at `/config/config.yaml`
+and pass the bot token as an environment variable:
+
+```bash
+docker run --rm -p 1339:1339/udp -e DISCORD_BOT_TOKEN \
+  -v "$PWD/config.yaml:/config/config.yaml:ro" \
+  ghcr.io/pingue/osctodiscord
+```
+
+## Releases
+
+Pushes to `main` are tested, then a semantic version is worked out from the
+[Conventional Commits](https://www.conventionalcommits.org/) since the last tag: `feat` bumps
+minor, `fix`/`perf` bump patch, and `!` or a `BREAKING CHANGE:` footer bumps major. Other types
+(`docs`, `ci`, `chore`, ...) don't release. When there is something to release it publishes the
+Docker image, tags the commit `vX.Y.Z` and creates a GitHub release.
